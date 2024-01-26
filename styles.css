@@ -221,4 +221,7 @@ body{
     .searchbox{
         top: 20vh;
     }
+    .error{
+        top:30vh;
+    }
   }
