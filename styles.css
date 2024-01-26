@@ -11,6 +11,7 @@
 body{
     background:url(./images/bg.jpg);
     background-size: cover;
+    background-attachment: fixed
 }
 
 .toplevel{
@@ -101,7 +102,6 @@ body{
 .loc{
     display: flex;
     font-size: 3vw;
-
 }
 .flag{
     margin-left: 0.4vw;
@@ -169,3 +169,56 @@ body{
 .load.active{
     scale: 1;
 }
+.error.active{
+    scale:1;
+}
+.error{
+    position: absolute;
+    top:20vw;
+    scale:0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.notfound{
+    border-radius: 50%;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.24);
+}
+.notfoundpara{
+    text-align: center;
+    margin-top: 2vw;
+    font-size: 4vw;
+    color: rgb(58, 57, 57);
+    font-family: 'Raleway', serif;
+    font-weight: 700;
+}
+@media screen and (max-width: 480px) {
+    .tab-container{
+        display: flex;
+        flex-direction: flex;
+        justify-content: space-between;
+        width: 190%;
+        margin-top: 5vh;
+    }
+    .title{
+        font-family: 'Raleway', serif;
+        font-size:5vw;
+        scale: 2;
+        margin-top: 1vh;
+    }
+    .loc{
+        display: flex;
+        font-size: 4vh;
+    }
+    .flag{
+        margin: 2vh;
+        scale: 3;
+    }
+    .desc1{
+        font-size: 2vh;
+        margin: 1vh;
+    }
+    .searchbox{
+        top: 20vh;
+    }
+  }

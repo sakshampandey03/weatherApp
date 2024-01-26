@@ -19,115 +19,127 @@ const searchButton = document.querySelector("#qbutton");
 const grantSection = document.querySelector(".grantloc");
 const userinfo = document.querySelector(".userinfo");
 const loadingScreen = document.querySelector(".load");
+const cityError = document.querySelector(".error");
 // console.log(searchCity);
 
 let currentTab = yourTab;
 currentTab.classList.add("currTab");
 
-searchTab.addEventListener("click",()=>{
+searchTab.addEventListener("click", () => {
     toggle(searchTab);
 })
-yourTab.addEventListener("click",()=>{
+yourTab.addEventListener("click", () => {
     toggle(yourTab);
 })
 
 checkStoredInfo();
 
-function toggle(clickedTab){
-    if(currentTab != clickedTab){
+function toggle(clickedTab) {
+    if (currentTab != clickedTab) {
         currentTab.classList.remove("currTab");
         clickedTab.classList.add("currTab");
-        currentTab = clickedTab ;
-        if(!searchSection.classList.contains("active")){
+        currentTab = clickedTab;
+        if (!searchSection.classList.contains("active")) {
             // search tab band hai , to ise kholo
             searchSection.classList.add("active");
             grantLoc.classList.remove("active");
             userinfo.classList.remove("active");
         }
-        else{
+        else {
             searchSection.classList.remove("active");
-            searchCity.value="";
+            searchCity.value = "";
             userinfo.classList.remove("active");
+            cityError.classList.remove("active");
             checkStoredInfo();
         }
     }
 }
 
-function checkStoredInfo(){
+function checkStoredInfo() {
     let coords = sessionStorage.getItem("userCoords");
-    if(coords){
+    if (coords) {
         // api call and make usernfo visible
         coords = JSON.parse(coords);
         fetchUsingCoords(coords);
     }
-    else{
+    else {
         grantLoc.classList.add("active");
     }
 }
-async function fetchUsingCoords(coord){
-    const {lat,lon} = coord;
-    try{
+async function fetchUsingCoords(coord) {
+    const { lat, lon } = coord;
+    try {
         grantLoc.classList.remove("active");
         loadingScreen.classList.add("active");
         const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric`);
-        const data =await res.json();
+        const data = await res.json();
         loadingScreen.classList.remove("active");
         userinfo.classList.add("active");
         renderWeather(data);
     }
-    
-    catch{
+
+    catch {
         loadingScreen.classList.remove("active");
         console.log("unable to get location");
     }
 
 }
-function renderWeather(data){
+function renderWeather(data) {
     console.log(data?.name);
     cityName.textContent = data?.name;
     countryFlag.src = `https://flagcdn.com/16x12/${data?.sys?.country.toLowerCase()}.png`;
     weatherDesc.textContent = data?.weather?.[0]?.description;
     weatherImg.src = `http://openweathermap.org/img/w/${data?.weather?.[0]?.icon}.png`;
-    temp.textContent = ` ${data?.main?.temp}`+" Celsius";;
-    windVal.textContent = `${data?.wind?.speed}`+" km/hr";
-    cloudVal.textContent =`${data?.clouds?.all}`+" %";
-    humidityVal.textContent = `${data?.main?.humidity}`+" %";
+    temp.textContent = ` ${data?.main?.temp}` + " Celsius";;
+    windVal.textContent = `${data?.wind?.speed}` + " km/hr";
+    cloudVal.textContent = `${data?.clouds?.all}` + " %";
+    humidityVal.textContent = `${data?.main?.humidity}` + " %";
 
     userinfo.classList.add("active");
     // searchSection.classList.add("active");
 }
 
-grantBut.addEventListener("click",()=>
-{
-    if(navigator.geolocation){
+grantBut.addEventListener("click", () => {
+    if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(showPosition);
     }
-    else{
+    else {
         alert("your browser doesnot support geolocation")
     }
 })
 
-function showPosition(pos){
+function showPosition(pos) {
     const uCoord = {
-        lat:pos.coords.latitude,
-        lon : pos.coords.longitude,
+        lat: pos.coords.latitude,
+        lon: pos.coords.longitude,
     }
     sessionStorage.setItem("userCoords", JSON.stringify(uCoord));
     fetchUsingCoords(uCoord);
 }
-async function fetchCityWeather(){
+async function fetchCityWeather() {
     const cityName = searchCity.value;
-    if(cityName != ""){
-        loadingScreen.classList.add("active");
-        const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${cityName}&appid=${API_KEY}&units=metric`);
-        const data =await res.json();
-        renderWeather(data);
-        loadingScreen.classList.remove("active");
+    if (cityName != "") {
+        try {
+            loadingScreen.classList.add("active");
+            const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${cityName}&appid=${API_KEY}&units=metric`);
+            if (!res.ok) {
+                throw new Error(`City not found (${res.status})`);
+            }
+            const data = await res.json();
+            renderWeather(data);
+            cityError.classList.remove("active");
+            loadingScreen.classList.remove("active");
+        }
+        catch (error) {
+            loadingScreen.classList.remove("active");
+            cityError.classList.add("active");
+            userinfo.classList.remove("active");
+        }
 
     }
 }
-searchCity.addEventListener("keypress",(event)=>{
-    if(event.key === "Enter"){
+searchCity.addEventListener("keypress", (event) => {
+    if (event.key === "Enter") {
         fetchCityWeather();
     }
 })
